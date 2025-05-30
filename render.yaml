@@ -1,16 +1,14 @@
 services:
   - type: web
-    name: product-scraper-api
-    env: python
-    buildCommand: |
-      pip install -r requirements.txt
-      python -m playwright install
-      python manage.py makemigrations
-      python manage.py migrate
-      python manage.py collectstatic --noinput
-    startCommand: gunicorn scraper.wsgi:application
+    name: product-scraper
+    env: docker
+    plan: free
+    dockerfilePath: Dockerfile
+    region: oregon
+    branch: main
+    autoDeploy: true
     envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: product_scraper.settings
       - key: PYTHONUNBUFFERED
         value: "1"
-      - key: DJANGO_SETTINGS_MODULE
-        value: scraper.settings
