@@ -11,7 +11,7 @@ async def scrape_flipkart(search_query):
         context = await browser.new_context(user_agent="Mozilla/5.0 ...")
         page = await context.new_page()
         await page.goto(search_url, timeout=60000)
-        await page.wait_for_selector("div._75nlfW", timeout=15000)
+        await page.wait_for_selector("div[class*='_']", timeout=60000)
 
         content = await page.content()
         soup = BeautifulSoup(content, "html.parser")
