@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-0+-cjcrr95!-y$)k)$l042780+rujhl4c@%-uxf$0$d6=n+@1w
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["product-scraper-api-amr7.onrender.com", "localhost" ]
 
 
 # Application definition
