@@ -3,7 +3,7 @@ services:
     name: product-scraper
     env: docker
     plan: free
-    dockerfilePath: Dockerfile
+    dockerfilePath: ./Dockerfile
     region: oregon
     branch: main
     autoDeploy: true
