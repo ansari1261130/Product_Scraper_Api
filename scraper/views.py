@@ -1,5 +1,3 @@
-import re
-import asyncio
 from django.shortcuts import render
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
@@ -8,17 +6,25 @@ from .Products.amazon import search_amazon
 from .Products.flipkart import search_flipkart
 from .Products.scrape_myntra import scrape_myntra
 
+import asyncio
+import re
+
 def run_async(coro):
     try:
+        # Try to run normally (works if no event loop running)
         return asyncio.run(coro)
     except RuntimeError:
-        loop = asyncio.get_event_loop()
+        # If event loop already running, create a new loop and run coroutine there
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
         return loop.run_until_complete(coro)
 
 def home(request):
     query = request.GET.get('query')
-    amazon_results, flipkart_results = [], []
-    ajio_results, myntra_results = [], []
+    amazon_results, flipkart_results, myntra_results = [], [], []
 
     if query:
         amazon_results = search_amazon(query)
@@ -38,11 +44,11 @@ def home(request):
 @api_view(['GET'])
 def product_search(request):
     query = request.GET.get('query', '').strip()
-    min_price = request.GET.get('min_price')
-    max_price = request.GET.get('max_price')
-
     if not query:
         return Response({"error": "No query provided"}, status=400)
+
+    min_price = request.GET.get('min_price')
+    max_price = request.GET.get('max_price')
 
     try:
         min_price = float(min_price) if min_price else None
@@ -56,7 +62,6 @@ def product_search(request):
 
     amazon_results = search_amazon(query)
     flipkart_results = search_flipkart(query)
-
     try:
         myntra_results = run_async(scrape_myntra(query))
     except Exception as e:
@@ -71,10 +76,12 @@ def product_search(request):
             product['price'] = price_val
         except:
             product['price'] = float('inf')
+
         try:
             product['rating'] = float(product.get('rating', 0))
         except:
             product['rating'] = 0.0
+
         return product
 
     cleaned_results = [clean_product(p) for p in results]
@@ -87,6 +94,8 @@ def product_search(request):
         return True
 
     filtered_results = list(filter(in_price_range, cleaned_results))
+
+    # Sort by price ascending, rating descending
     sorted_results = sorted(filtered_results, key=lambda p: (p['price'], -p['rating']))
 
     return Response({"results": sorted_results})

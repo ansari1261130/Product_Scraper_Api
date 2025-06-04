@@ -20,3 +20,5 @@ typing_extensions==4.13.2
 tzdata==2025.2
 urllib3==2.4.0
 waitress==3.0.2
+zenrows==1.4.0
+python-dotenv==1.1.0
