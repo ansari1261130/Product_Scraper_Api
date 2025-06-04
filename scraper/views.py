@@ -6,7 +6,6 @@ from rest_framework.response import Response
 
 from .Products.amazon import search_amazon
 from .Products.flipkart import search_flipkart
-from .Products.scrape_ajio import scrape_ajio
 from .Products.scrape_myntra import scrape_myntra
 
 def run_async(coro):
@@ -25,10 +24,6 @@ def home(request):
         amazon_results = search_amazon(query)
         flipkart_results = search_flipkart(query)
         try:
-            ajio_results = run_async(scrape_ajio(query))
-        except Exception as e:
-            print("Ajio error:", e)
-        try:
             myntra_results = run_async(scrape_myntra(query))
         except Exception as e:
             print("Myntra error:", e)
@@ -37,7 +32,6 @@ def home(request):
         'query': query,
         'amazon_results': amazon_results,
         'flipkart_results': flipkart_results,
-        'ajio_results': ajio_results,
         'myntra_results': myntra_results,
     })
 
@@ -64,18 +58,12 @@ def product_search(request):
     flipkart_results = search_flipkart(query)
 
     try:
-        ajio_results = run_async(scrape_ajio(query))
-    except Exception as e:
-        print("Ajio error:", e)
-        ajio_results = []
-
-    try:
         myntra_results = run_async(scrape_myntra(query))
     except Exception as e:
         print("Myntra error:", e)
         myntra_results = []
 
-    results = amazon_results + flipkart_results + ajio_results + myntra_results
+    results = amazon_results + flipkart_results + myntra_results
 
     def clean_product(product):
         try:
